@@ -38,14 +38,22 @@ const main = async () => {
       app.use(express.json());
       app.use(cors());
 
-      app.post("/", upload.single("image"), async (req, res) => {
-        const upload_image = await Image.createQueryBuilder()
-          .insert()
-          .into(Image)
-          .values({ image: req?.file?.filename })
-          .returning("*")
-          .execute();
-        res.send({ data: upload_image.raw });
+      app.post("/", upload.array("image", 5), async (req, res) => {
+        const files: any = req.files;
+
+        for (let i = 0; i < files!.length; i++) {
+          if (files) {
+            Image.createQueryBuilder()
+              .insert()
+              .into(Image)
+              .values({ image: files && files[i]?.filename })
+              .returning("*")
+              .execute()
+              .then();
+          }
+        }
+
+        res.send({ data: "upload" });
       });
 
       app.listen(PORT, () => {
